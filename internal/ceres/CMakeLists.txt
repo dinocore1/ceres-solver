@@ -144,6 +144,9 @@ else (SCHUR_SPECIALIZATIONS)
 endif (SCHUR_SPECIALIZATIONS)
 
 # Build the list of dependencies for Ceres based on the current configuration.
+
+list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES eigen)
+
 if (NOT MINIGLOG AND GLOG_FOUND)
   list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES ${GLOG_LIBRARIES})
   if (GFLAGS_FOUND)

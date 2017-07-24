@@ -227,7 +227,7 @@ class CERES_EXPORT MessageLogger {
  private:
   void LogToSinks(int severity) {
     time_t rawtime;
-    time (&rawtime);
+    ::time (&rawtime);
 
     struct tm timeinfo;
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)

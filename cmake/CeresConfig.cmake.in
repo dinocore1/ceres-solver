@@ -200,40 +200,7 @@ endif(CERES_WAS_INSTALLED)
 # Set the version.
 set(CERES_VERSION @CERES_VERSION@ )
 
-# Eigen.
-# Flag set during configuration and build of Ceres.
-set(CERES_EIGEN_VERSION @EIGEN_VERSION@)
-set(EIGEN_WAS_BUILT_WITH_CMAKE @FOUND_INSTALLED_EIGEN_CMAKE_CONFIGURATION@)
-# Append the locations of Eigen when Ceres was built to the search path hints.
-if (EIGEN_WAS_BUILT_WITH_CMAKE)
-  set(Eigen3_DIR @Eigen3_DIR@)
-  set(EIGEN_PREFER_EXPORTED_EIGEN_CMAKE_CONFIGURATION TRUE)
-else()
-  list(APPEND EIGEN_INCLUDE_DIR_HINTS @EIGEN_INCLUDE_DIR@)
-endif()
-# Search quietly to control the timing of the error message if not found. The
-# search should be for an exact match, but for usability reasons do a soft
-# match and reject with an explanation below.
-find_package(Eigen ${CERES_EIGEN_VERSION} QUIET)
-if (EIGEN_FOUND)
-  if (NOT EIGEN_VERSION VERSION_EQUAL CERES_EIGEN_VERSION)
-    # CMake's VERSION check in FIND_PACKAGE() will accept any version >= the
-    # specified version. However, only version = is supported. Improve
-    # usability by explaining why we don't accept non-exact version matching.
-    ceres_report_not_found("Found Eigen dependency, but the version of Eigen "
-      "found (${EIGEN_VERSION}) does not exactly match the version of Eigen "
-      "Ceres was compiled with (${CERES_EIGEN_VERSION}). This can cause subtle "
-      "bugs by triggering violations of the One Definition Rule. See the "
-      "Wikipedia article http://en.wikipedia.org/wiki/One_Definition_Rule "
-      "for more details")
-  endif ()
-  message(STATUS "Found required Ceres dependency: "
-    "Eigen version ${CERES_EIGEN_VERSION} in ${EIGEN_INCLUDE_DIRS}")
-else (EIGEN_FOUND)
-  ceres_report_not_found("Missing required Ceres "
-    "dependency: Eigen version ${CERES_EIGEN_VERSION}, please set "
-    "EIGEN_INCLUDE_DIR.")
-endif (EIGEN_FOUND)
+
 list(APPEND CERES_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
 
 # Glog.

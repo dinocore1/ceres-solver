@@ -137,6 +137,9 @@ option(BUILD_DOCUMENTATION "Build User's Guide (html)" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_SHARED_LIBS "Build Ceres as a shared library." OFF)
 if (MSVC)
+  # enable parallel build
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
+
   option(MSVC_USE_STATIC_CRT
     "MS Visual Studio: Use static C-Run Time Library in place of shared." OFF)
 
@@ -203,7 +206,7 @@ endif (IOS)
 unset(CERES_COMPILE_OPTIONS)
 
 # Eigen.
-find_package(Eigen REQUIRED)
+find_package(eigen REQUIRED)
 if (EIGEN_FOUND)
   if (EIGEN_VERSION VERSION_LESS 3.1.0)
     message(FATAL_ERROR "-- Ceres requires Eigen version >= 3.1.0 in order "
@@ -590,20 +593,16 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
   if (CMAKE_COMPILER_IS_GNUCXX)
     # Linux
     if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-      if (NOT GCC_VERSION VERSION_LESS 4.2)
+      if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.2)
         set (CERES_CXX_FLAGS "${CERES_CXX_FLAGS} -march=native -mtune=native")
-      endif (NOT GCC_VERSION VERSION_LESS 4.2)
+      endif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.2)
     endif (CMAKE_SYSTEM_NAME MATCHES "Linux")
     # Mac OS X
     if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
       set (CERES_CXX_FLAGS "${CERES_CXX_FLAGS} -msse3")
       # Use of -fast only applicable for Apple's GCC
       # Assume this is being used if GCC version < 4.3 on OSX
-      execute_process(COMMAND ${CMAKE_C_COMPILER}
-        ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-        OUTPUT_VARIABLE GCC_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if (GCC_VERSION VERSION_LESS 4.3)
+      if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
         set (CERES_CXX_FLAGS "${CERES_CXX_FLAGS} -fast")
       endif (GCC_VERSION VERSION_LESS 4.3)
     endif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -720,19 +719,15 @@ endif ()
 # Xcode 4.5.x used Clang 4.1 (Apple version), this has a bug that prevents
 # compilation of Ceres.
 if (APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER}
-    ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-    OUTPUT_VARIABLE CLANG_VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
   # Use version > 4.0 & < 4.2 to catch all 4.1(.x) versions.
-  if (CLANG_VERSION VERSION_GREATER 4.0 AND
-      CLANG_VERSION VERSION_LESS 4.2)
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.0 AND
+      CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.2)
     message(FATAL_ERROR "You are attempting to build Ceres on OS X using Xcode "
-      "4.5.x (Clang version: ${CLANG_VERSION}). This version of Clang has a "
+      "4.5.x (Clang version: ${CMAKE_CXX_COMPILER_VERSION}). This version of Clang has a "
       "bug that prevents compilation of Ceres, please update to "
       "Xcode >= 4.6.3.")
-  endif (CLANG_VERSION VERSION_GREATER 4.0 AND
-    CLANG_VERSION VERSION_LESS 4.2)
+  endif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.0 AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.2)
 endif (APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
 # Configure the Ceres config.h compile options header using the current
@@ -832,11 +827,7 @@ configure_file("${Ceres_SOURCE_DIR}/cmake/CeresConfigVersion.cmake.in"
 
 # Set the install path for the installed CeresConfig.cmake configuration file
 # relative to CMAKE_INSTALL_PREFIX.
-if (WIN32)
-  set(RELATIVE_CMAKECONFIG_INSTALL_DIR CMake)
-else ()
-  set(RELATIVE_CMAKECONFIG_INSTALL_DIR lib${LIB_SUFFIX}/cmake/Ceres)
-endif ()
+set(RELATIVE_CMAKECONFIG_INSTALL_DIR cmake)
 
 # This "exports" for installation all targets which have been put into the
 # export set "CeresExport". This generates a CeresTargets.cmake file which,
@@ -872,7 +863,6 @@ install(FILES "${Ceres_BINARY_DIR}/CeresConfig-install.cmake"
         RENAME CeresConfig.cmake
         DESTINATION ${RELATIVE_CMAKECONFIG_INSTALL_DIR})
 install(FILES "${Ceres_BINARY_DIR}/CeresConfigVersion.cmake"
-              "${Ceres_SOURCE_DIR}/cmake/FindEigen.cmake"
               "${Ceres_SOURCE_DIR}/cmake/FindGlog.cmake"
               "${Ceres_SOURCE_DIR}/cmake/FindGflags.cmake"
         DESTINATION ${RELATIVE_CMAKECONFIG_INSTALL_DIR})
