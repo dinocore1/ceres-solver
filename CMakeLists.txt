@@ -137,6 +137,9 @@ option(BUILD_DOCUMENTATION "Build User's Guide (html)" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_SHARED_LIBS "Build Ceres as a shared library." OFF)
 if (MSVC)
+  # enable parallel build
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
+
   option(MSVC_USE_STATIC_CRT
     "MS Visual Studio: Use static C-Run Time Library in place of shared." OFF)
 
@@ -203,7 +206,7 @@ endif (IOS)
 unset(CERES_COMPILE_OPTIONS)
 
 # Eigen.
-find_package(Eigen REQUIRED)
+find_package(eigen REQUIRED)
 if (EIGEN_FOUND)
   if (EIGEN_VERSION VERSION_LESS 3.1.0)
     message(FATAL_ERROR "-- Ceres requires Eigen version >= 3.1.0 in order "
@@ -860,7 +863,6 @@ install(FILES "${Ceres_BINARY_DIR}/CeresConfig-install.cmake"
         RENAME CeresConfig.cmake
         DESTINATION ${RELATIVE_CMAKECONFIG_INSTALL_DIR})
 install(FILES "${Ceres_BINARY_DIR}/CeresConfigVersion.cmake"
-              "${Ceres_SOURCE_DIR}/cmake/FindEigen.cmake"
               "${Ceres_SOURCE_DIR}/cmake/FindGlog.cmake"
               "${Ceres_SOURCE_DIR}/cmake/FindGflags.cmake"
         DESTINATION ${RELATIVE_CMAKECONFIG_INSTALL_DIR})
